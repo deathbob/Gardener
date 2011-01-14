@@ -1,2 +1,44 @@
 =Gardener
 ==A Simple Rails Plugin to help you create seed data
+Easy transfer of individual records in a Rails app between environments via yaml dumps. 
+
+But you don't need to know that.
+
+All you care about is 
+
+==Usage
+Put 
+	gem 'gardener'
+in your gemfile and gardener gets right to work.
+
+He's there behind the scenes and you can call on him in several ways.
+
+==Class Methods
+
+===sow
+	User.sow 
+for example, would render all the users down into a yaml file, which you could then commit into your source control,
+and deploy to staging or production.
+
+Once deployed you could write a rake task :P
+or just go into the rails console :D 
+and call 
+	User.reap
+to pull the records up out of the file and into your database.
+===reap
+"[...] whatsoever a man soweth, that shall he also reap" - Galatians 6:7-8
+For reaping the fruits of your labor.  
+
+==Instance Methods
+
+===plant_seed
+	User.find(1)
+	User.plant_seed
+Would put only the one user in a file to be reconstituted later.  This is the use case that I wrote this for, 
+I found myself making lots of copy changes to databased content for websites, and needed a simple way to move those things
+from one environment (development --> staging or staging --> production) to another.  I didn't want to copy over entire tables
+because there were some records that didn't need to come over, so existing tools like Taps http://adam.heroku.com/past/2009/2/11/taps_for_easy_database_transfers/
+weren't a perfect fit for me.  
+
+
+
