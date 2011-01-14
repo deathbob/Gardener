@@ -1,0 +1,2 @@
+=Gardener
+==A Simple Rails Plugin to help you create seed data
