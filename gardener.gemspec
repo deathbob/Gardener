@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gardener}
-  s.version = "0.1.0"
+  s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bob Larrick"]
-  s.date = %q{2011-01-14}
+  s.date = %q{2011-02-08}
   s.description = %q{A Ruby on Rails Plugin to help you create seed data.  Useful when you want to move just a few pieces of data 		from one environment to another.  To my knowledge there is no other gem that will help you move a few records from your development or staging 		environment to your production environment.}
   s.email = %q{larrick@gmail.com}
   s.extra_rdoc_files = [
