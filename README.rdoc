@@ -1,44 +1,100 @@
 =Gardener
 ==A Simple Rails Plugin to help you create seed data
-Easy transfer of individual records in a Rails app between environments via yaml dumps. 
-
-But you don't need to know that.
-
-All you care about is 
+Easy transfer of individual records in a Rails app between environments via yaml dumps.
+Gardener is intended to be used from the rails console, although I suppose you could script it with rake or something if you really wanted to.
 
 ==Usage
-Put 
+Put
 	gem 'gardener'
 in your gemfile and gardener gets right to work.
 
 He's there behind the scenes and you can call on him in several ways.
 
-==Class Methods
-
-===sow
-	User.sow 
-for example, would render all the users down into a yaml file, which you could then commit into your source control,
-and deploy to staging or production.
-
-Once deployed you could write a rake task :P
-or just go into the rails console :D 
-and call 
-	User.reap
-to pull the records up out of the file and into your database.
-===reap
-"[...] whatsoever a man soweth, that shall he also reap" - Galatians 6:7-8
-For reaping the fruits of your labor.  
-
 ==Instance Methods
 
 ===plant_seed
-	User.find(1)
-	User.plant_seed
-Would put only the one user in a file to be reconstituted later.  This is the use case that I wrote this for, 
-I found myself making lots of copy changes to databased content for websites, and needed a simple way to move those things
-from one environment (development --> staging or staging --> production) to another.  I didn't want to copy over entire tables
-because there were some records that didn't need to come over, so existing tools like Taps http://adam.heroku.com/past/2009/2/11/taps_for_easy_database_transfers/
-weren't a perfect fit for me.  
+	c = Content.first
+	c.plant_seed
+
+This is the use case I wrote Gardener to solve.
+I found myself (any my designers) making lots of fiddly copy changes to databased content, and needed a simple way to
+pick and choose individual records to move from one environment (development --> staging or staging --> production) to another.
+If you're asking yourself, "Why do you need to move just a few records from one database to another?" then you are lucky and I wish I was you.
+If you're saying "Oh yeah, I do that too, and boy is it a PITA" then you are me and we are very lucky too because Gardener is here to help us out.
+
+Gardener should be pretty much database agnostic, if you can .to_yaml it, Gardener can work in whatever soil type you have.
+
+plant_seed can plant seeds for associated objects (or any method that returns objects).
+  c.plant_seed(:include => :foos)
+  # plant seeds for foo objects associated with c
+  c.plant_seed(:include => [:foos, :bars])
+  # plant seeds for foo and bar objects associated with c
+  c.plant_seed(:include => {:foos => :bazs})
+  # plant seeds for foo objects associated with c, and plant seeds for baz objects associated with those foo objects
+
+n.b. There is not currently a way to reconstitute associated objects in the same call as the object itself.
+To rebuild the associations in the example above you would call Content.reap, Foo.reap and Bar.reap.
+So far this isn't a major pain point for me but it is on the list of things to do.
+
+
+If you need to copy entire tables or databases from one thing to another Taps
+http://adam.heroku.com/past/2009/2/11/taps_for_easy_database_transfers/ is probably a better bet for you.
+
+===diff
+As a helper method for determining what attributes of an object conflict there is a diff method available to you.
+   u = User.first
+   uu = User.last
+   u.diff(uu)
+   #   {"encrypted_password"=>
+   #     {:original=>"c90196966e062a2e62fa7b42e3e0bbe8b529600b",
+   #      :new=>"13630bfb3bb60320170968bac76b7d6f6beebca5"},
+   #    "salt"=>
+   #      {:original=>"e9dc65d4492d2deee519bb265d972e6054ccc254",
+   #       :new=>"600d7de1ac258ea3df5e833e3717120b577d9031"},
+   #     "created_at"=>
+   #       {:original=>Tue Aug 11 13:55:27 UTC 2009,
+   #        :new=>Tue, 11 May 2010 12:28:44 CDT -05:00},
+   #     "token"=>{:original=>nil, :new=>"cebd2d210d6e9072d3cc7d46f98d64df6d4b8ce5"},
+   #     "updated_at"=>
+   #       {:original=>Tue Sep 21 13:41:00 UTC 2010,
+   #        :new=>Tue, 11 May 2010 12:35:38 CDT -05:00},
+   #     "id"=>{:original=>1, :new=>13},
+   #     "token_expires_at"=>
+   #       {:original=>nil, :new=>Tue, 25 May 2010 12:35:38 CDT -05:00}}
+
+You will encounter this if you have conflicting IDs during a reaping cycle, and it's there for you to use for any other reason that strikes your fancy.
+
+
+
+==Class Methods
+
+===reap
+"[...] whatsoever a man soweth, that shall he also reap" - Galatians 6:7-8
+For reaping the fruits of your labor.
+
+This is how you get records out of your garden and back into your database.
+
+It is not unusual when transfering a couple records from one database to another to discover the IDs are already taken.
+When Gardener determines you are trying to sprout a record with an ID that already exists, it will prompt you to take one of several actions.
+
+'y' will overwrite the database record with the attributes of the garden record.
+'n' will make no changes to the database record.
+'i' will give the garden record a new id, so that it doesn't conflict anymore.  Database record stays the same, garden record gets a new identity.
+'a' will raise an error and abort the whole procedure, making no changes to anything.  This is your failsafe for when you realize you weren't done sowing your wild oats.
+
+You can add 'z' to any of the above responses and Gardener will apply that response to the remainder of the records being reaped.  Most often used like 'iz'.
+
+
+===sow
+	User.sow
+for example, would plant all the User records in the garden, which you could then commit into your (D)VCS and deploy wherever.
+
+Once deployed you could write a rake task :P
+or just go into the rails console :D
+and call
+	User.reap
+to pull the records up out of the file and into your database.
+
 
 
 
