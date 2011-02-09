@@ -1,6 +1,7 @@
 =Gardener
 ==A Simple Rails Plugin to help you create seed data
-Easy transfer of individual records in a Rails app between environments via yaml dumps.
+Easy transfer of individual records between environments / databases.
+
 Gardener is intended to be used from the rails console, although I suppose you could script it with rake or something if you really wanted to.
 
 ==Usage
@@ -17,20 +18,23 @@ He's there behind the scenes and you can call on him in several ways.
 	c.plant_seed
 
 This is the use case I wrote Gardener to solve.
+
 I found myself (any my designers) making lots of fiddly copy changes to databased content, and needed a simple way to
 pick and choose individual records to move from one environment (development --> staging or staging --> production) to another.
+
 If you're asking yourself, "Why do you need to move just a few records from one database to another?" then you are lucky and I wish I was you.
+
 If you're saying "Oh yeah, I do that too, and boy is it a PITA" then you are me and we are very lucky too because Gardener is here to help us out.
 
 Gardener should be pretty much database agnostic, if you can .to_yaml it, Gardener can work in whatever soil type you have.
 
 plant_seed can plant seeds for associated objects (or any method that returns objects).
   c.plant_seed(:include => :foos)
-  # plant seeds for foo objects associated with c
+    # plant seeds for foo objects associated with c
   c.plant_seed(:include => [:foos, :bars])
-  # plant seeds for foo and bar objects associated with c
+    # plant seeds for foo and bar objects associated with c
   c.plant_seed(:include => {:foos => :bazs})
-  # plant seeds for foo objects associated with c, and plant seeds for baz objects associated with those foo objects
+    # plant seeds for foo objects associated with c, and plant seeds for baz objects associated with those foo objects
 
 n.b. There is not currently a way to reconstitute associated objects in the same call as the object itself.
 To rebuild the associations in the example above you would call Content.reap, Foo.reap and Bar.reap.
@@ -69,7 +73,11 @@ You will encounter this if you have conflicting IDs during a reaping cycle, and 
 ==Class Methods
 
 ===reap
+        User.reap
+        Content.reap
+
 "[...] whatsoever a man soweth, that shall he also reap" - Galatians 6:7-8
+
 For reaping the fruits of your labor.
 
 This is how you get records out of your garden and back into your database.
@@ -78,8 +86,11 @@ It is not unusual when transfering a couple records from one database to another
 When Gardener determines you are trying to sprout a record with an ID that already exists, it will prompt you to take one of several actions.
 
 'y' will overwrite the database record with the attributes of the garden record.
+
 'n' will make no changes to the database record.
+
 'i' will give the garden record a new id, so that it doesn't conflict anymore.  Database record stays the same, garden record gets a new identity.
+
 'a' will raise an error and abort the whole procedure, making no changes to anything.  This is your failsafe for when you realize you weren't done sowing your wild oats.
 
 You can add 'z' to any of the above responses and Gardener will apply that response to the remainder of the records being reaped.  Most often used like 'iz'.
@@ -87,14 +98,14 @@ You can add 'z' to any of the above responses and Gardener will apply that respo
 
 ===sow
 	User.sow
-for example, would plant all the User records in the garden, which you could then commit into your (D)VCS and deploy wherever.
+Will plant all the User records in the garden, which you can commit to your (D)VCS and deploy wherever.
 
-Once deployed you could write a rake task :P
-or just go into the rails console :D
-and call
-	User.reap
-to pull the records up out of the file and into your database.
 
+==Things To Note
+
+Class.sow and instance.plant_seed both append yaml to a file.  The practical implication of this is that you have to delete the file and then sow or plant_seed if you don't want the old stuff to come along with the new when you call reap.  Be mindful of this.
+
+It also means calling plant_seed repeatedly on the same object will put multiple copies of that object in your garden, and that reap will try and put multiple copies in your database.  This will most likely fail spectacularly, and at least insidiously.
 
 
 
