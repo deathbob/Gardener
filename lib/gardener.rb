@@ -1,7 +1,6 @@
 module Gardener
   
-  yaml_start = /^---/
-  
+
   def self.included(base)
     base.extend(ClassMethods)
   end
@@ -33,7 +32,7 @@ module Gardener
       @abra = []
       str = ''
       File.open(garden_path, 'r').each_line do |line|
-        if line.match yaml_start
+        if line.match /^---/
           @abra << str
           str = ''
         end
@@ -46,7 +45,7 @@ module Gardener
     def reap
       str = ''
       File.open(garden_path, 'r').each_line do |line|
-        if line.match yaml_start
+        if line.match /^---/
           sprout(str)
           str = ''
         end
