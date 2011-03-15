@@ -8,7 +8,11 @@ module Gardener
   module ClassMethods
 
     attr_accessor :infinite_choice
-
+    
+    # Deletes the file associated with this class, so you can plant new seeds.  Should be done once per growing season.  
+    def harrow
+      File.delete(garden_path)
+    end
 
     # Dump every instance of a class (every record in the database for a model) into a file
     # to be reconstituted later.
@@ -54,7 +58,6 @@ module Gardener
       sprout(str) unless str.blank?
     end
 
-
     # Helper function to reconstitute a record from it's yaml representation.
     def sprout(str)
       return false if str.blank?
@@ -88,6 +91,7 @@ module Gardener
 
         if res.match(/y/i)
           scott = bob
+          scott.instance_variable_set("@new_record", false) # Want to do an update, not an insert
           scott.save
         elsif res.match(/a/i)
           raise "Salting the earth.  Nothing will grow here for some time ..."
@@ -103,9 +107,6 @@ module Gardener
     end
 
   end  # End ClassMethods
-
-
-
 
 ##### Instance Methods #####
 
@@ -138,7 +139,6 @@ module Gardener
     dir = File.join [Rails.root, 'db', 'garden']
     Dir.mkdir(dir) unless File.exists?(dir)
 
-
     File.open(File.join([Rails.root, 'db', 'garden', "#{c}.yml"] ), 'a') do |file|
       file << self.to_yaml
     end
@@ -149,9 +149,8 @@ module Gardener
       tom = self.send(k) if self.respond_to?(k)
       [*tom].each{|y| y.plant_seed({:include => v})}
     end
-
+    true
   end
-
 
   def things_to_include(options)
     # [*THING] is so that THING can be an array or a single instance of a class.
@@ -169,6 +168,25 @@ module Gardener
     {"#{self.class.to_s.underscore}_#{self.id}" => self.attributes}.to_yaml
   end
 
+  # Workaround for DelayedJob which has kind of an unfriendly monkey patch on ActiveRecord::Base
+  # This in itself is kind of rude, since I don't know if anyone besides DelayedJob has a (legitimate) reason
+  # for hanging :yaml_new on AR::Base.  If you notice that my patch to unfuck the DJ patch is fucking you, 
+  # please let me know, I want us all to get along.  Hopefully we'll all get the refinements thing working soon
+  # and stop stepping on each others toes.
+  if ActiveRecord::Base.respond_to? :yaml_new
+    class ActiveRecord::Base
+      def self.yaml_new(klass, tag, val)
+        foo = klass.find(val['attributes']['id'])
+      rescue ActiveRecord::RecordNotFound
+        foo = klass.new
+        val['attributes'].each do |k, v|
+          meth = "#{k}="
+          foo.send(meth, v) if foo.respond_to?(meth)
+        end
+        foo
+      end
+    end
+  end
 
 
 end
