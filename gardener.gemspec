@@ -5,12 +5,16 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gardener}
-  s.version = "1.1.5"
+  s.version = "1.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bob Larrick"]
-  s.date = %q{2011-03-14}
-  s.description = %q{A Ruby on Rails Plugin to help you create seed data.  Useful when you want to move a few records from one database or environment to another. }
+  s.date = %q{2011-04-18}
+  s.description = %q{A Ruby on Rails Plugin to help you create seed data.  Useful when you want to move a few records from one database or environment to another. 
+
+# staging foo = Model.find(id); foo.plant_seed; 
+
+# production Model.reap;}
   s.email = %q{larrick@gmail.com}
   s.extra_rdoc_files = [
     "README.rdoc"
