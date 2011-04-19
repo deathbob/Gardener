@@ -1,5 +1,5 @@
 module Gardener
-  
+
 
   def self.included(base)
     base.extend(ClassMethods)
@@ -8,8 +8,8 @@ module Gardener
   module ClassMethods
 
     attr_accessor :infinite_choice
-    
-    # Deletes the file associated with this class, so you can plant new seeds.  Should be done once per growing season.  
+
+    # Deletes the file associated with this class, so you can plant new seeds.  Should be done once per growing season.
     def harrow
       File.delete(garden_path)
     end
@@ -29,7 +29,7 @@ module Gardener
     def garden_path
       File.join([Rails.root, 'db', 'garden', "#{self.to_s.underscore.pluralize}.yml"] )
     end
-    
+
     # Loads each yaml representation of an object up into an array, so you can play with them individually.
     def secret_garden
       instance_eval "attr_accessor :abra"
@@ -42,7 +42,7 @@ module Gardener
         end
         str << line
       end
-      @abra << str unless str.blank?      
+      @abra << str unless str.blank?
     end
 
     # Take the things that were dumped to a file and put them in the database.
@@ -168,10 +168,9 @@ module Gardener
     {"#{self.class.to_s.underscore}_#{self.id}" => self.attributes}.to_yaml
   end
 
-  # Workaround for DelayedJob which has kind of an unfriendly monkey patch on ActiveRecord::Base
-  # This in itself is kind of rude, since I don't know if anyone besides DelayedJob has a (legitimate) reason
-  # for hanging :yaml_new on AR::Base.  If you notice that my patch to unfuck the DJ patch is fucking you, 
-  # please let me know, I want us all to get along.  Hopefully we'll all get the refinements thing working soon
+  # Workaround for DelayedJob which has an unfriendly monkey patch on ActiveRecord::Base.
+  # If you notice that my patch to unfuck the DJ patch is causing problems please let me know,
+  # I want us all to get along.  Hopefully we'll get refinements working soon :P
   # and stop stepping on each others toes.
   if ActiveRecord::Base.respond_to? :yaml_new
     class ActiveRecord::Base

@@ -6,7 +6,7 @@ Gardener is intended to be used from the rails console, although I suppose you c
 
 ==Usage
 Put
-	gem 'gardener'
+  gem 'gardener'
 in your gemfile and gardener gets right to work.
 
 He's there behind the scenes and you can call on him in several ways.
@@ -14,8 +14,8 @@ He's there behind the scenes and you can call on him in several ways.
 ==Instance Methods
 
 ===plant_seed
-	c = Content.first
-	c.plant_seed
+  c = Content.first
+  c.plant_seed
 
 This is the use case I wrote Gardener to solve.
 
@@ -97,7 +97,7 @@ You can add 'z' to any of the above responses and Gardener will apply that respo
 
 
 ===sow
-	User.sow
+  User.sow
 Will plant all the User records in the garden, which you can commit to your (D)VCS and deploy wherever.
 
 
